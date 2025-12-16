@@ -328,148 +328,6 @@
             <param name="name"></param>
             <param name="value"></param>
         </member>
-        <member name="F:Parbad.GatewayAccountInvoiceExtensions.GatewayAccountKeyName">
-            <summary>
-            Gateway Account key in <see cref="P:Parbad.Abstraction.Invoice.Properties"/> property.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayAccountInvoiceExtensions.UseAccount(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
-            <summary>
-            Uses the given account to communicate with the gateway.
-            </summary>
-            <param name="builder"></param>
-            <param name="accountName">Name of the account.</param>
-        </member>
-        <member name="M:Parbad.GatewayAccountInvoiceExtensions.GetAccountName(Parbad.Abstraction.Invoice)">
-            <summary>
-            Gets the account name if specified.
-            </summary>
-            <param name="invoice"></param>
-        </member>
-        <member name="T:Parbad.GatewayBuilders.IGatewayAccountBuilder`1">
-            <summary>
-            A builder for building gateway accounts.
-            </summary>
-            <typeparam name="TAccount">Type of the gateway account.</typeparam>
-        </member>
-        <member name="P:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Services">
-            <summary>
-            Specifies the contract for a collection of service descriptors.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Clear">
-            <summary>
-            Removes the account sources of this gateway.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add(Parbad.GatewayBuilders.IGatewayAccountSource{`0})">
-            <summary>
-            Adds the given <paramref name="source"/> for specifying the accounts of type <typeparamref name="TAccount"/>.
-            </summary>
-            <param name="source">An account source for specifying the accounts.</param>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add``1(Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
-            <summary>
-            Adds the given <typeparamref name="TSource"/> for specifying the accounts of type <typeparamref name="TAccount"/>.
-            </summary>
-            <typeparam name="TSource">Type of the account source.</typeparam>
-            <param name="serviceLifetime">Lifetime of <typeparamref name="TSource"></typeparamref>.</param>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add(System.Func{System.IServiceProvider,Parbad.GatewayBuilders.IGatewayAccountSource{`0}},Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
-            <summary>
-            Adds the given account source factory for specifying the accounts of type <typeparamref name="TAccount"/>.
-            </summary>
-            <param name="factory">A factory for creating an instance of <see cref="T:Parbad.GatewayBuilders.IGatewayAccountSource`1"/>.</param>
-            <param name="serviceLifetime">Lifetime of the given source.</param>
-        </member>
-        <member name="T:Parbad.GatewayBuilders.IGatewayAccountCollection`1">
-            <summary>
-            A collection for holding gateway accounts.
-            </summary>
-            <typeparam name="TAccount">Type of account.</typeparam>
-            <exception cref="T:Parbad.Exceptions.DuplicateAccountException"></exception>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountCollection`1.Get(System.String)">
-            <summary>
-            Gets an account with the given <paramref name="name"/>.
-            </summary>
-            <param name="name">Name of account.</param>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountCollection`1.GetDefaultAccount">
-            <summary>
-            Gets the first account.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Parbad.GatewayBuilders.IGatewayAccountSource`1">
-            <summary>
-            A source which used to add the accounts of the specified gateway.
-            </summary>
-            <typeparam name="TAccount"></typeparam>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayAccountSource`1.AddAccountsAsync(Parbad.GatewayBuilders.IGatewayAccountCollection{`0})">
-            <summary>
-            Adds the accounts for specified gateway.
-            </summary>
-            <param name="accounts"></param>
-        </member>
-        <member name="T:Parbad.GatewayBuilders.IGatewayBuilder">
-            <summary>
-            A builder for building a gateway.
-            </summary>
-        </member>
-        <member name="P:Parbad.GatewayBuilders.IGatewayBuilder.Services">
-            <summary>
-            Specifies the contract for a collection of service descriptors.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayBuilder.AddGateway``1(Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
-            <summary>
-            Adds the specified gateway to Parbad services.
-            </summary>
-            <typeparam name="TGateway">Type of gateway.</typeparam>
-            <param name="serviceLifetime">Lifetime of <typeparamref name="TGateway"/>.</param>
-        </member>
-        <member name="T:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1">
-            <summary>
-            A builder for configuring the specified gateway.
-            </summary>
-            <typeparam name="TGateway">Type of gateway.</typeparam>
-        </member>
-        <member name="P:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.Services">
-            <summary>
-            Specifies the contract for a collection of service descriptors.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithAccounts``1(System.Action{Parbad.GatewayBuilders.IGatewayAccountBuilder{``0}})">
-            <summary>
-            Configures the accounts of type <typeparamref name="TAccount"/> for <typeparamref name="TGateway"/>.
-            </summary>
-            <typeparam name="TAccount">Account of <typeparamref name="TGateway"/>.</typeparam>
-            <param name="configureAccounts">Configures the accounts.</param>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithHttpClient(System.Action{Microsoft.Extensions.DependencyInjection.IHttpClientBuilder})">
-            <summary>
-            Configures the <see cref="T:System.Net.Http.HttpClient"/> required by <typeparamref name="TGateway"/>
-            for sending HTTP requests and receiving HTTP responses.
-            </summary>
-            <param name="configureHttpClient">HttpClient configuration.</param>
-        </member>
-        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithHttpClient``2(System.Action{System.IServiceProvider,System.Net.Http.HttpClient},System.Action{Microsoft.Extensions.DependencyInjection.IHttpClientBuilder})">
-            <summary>
-            Configures the HttpClient for TGateway and its implementation.
-            </summary>
-        </member>
-        <member name="T:Parbad.GatewayTransporterDescriptor">
-            <summary>
-            Describes a gateway transporter.
-            </summary>
-        </member>
-        <member name="M:Parbad.GatewayTransporterExtensions.Transport(Parbad.IGatewayTransporter)">
-            <summary>
-            Transports the client to the specified gateway.
-            </summary>
-        </member>
         <member name="M:Parbad.Gateway.AsanPardakht.AsanPardakhtGateway.RequestAsync(Parbad.Abstraction.Invoice,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
@@ -930,6 +788,31 @@
             Additional Data that can be sent to Pasargad gateway when requesting a token.
             </summary>
         </member>
+        <member name="T:Parbad.Gateway.Saman.Internal.Models.SamanSettlementIbanInfo">
+            <summary>
+            Represents a single settlement (Tashim) item for Saman Gateway.
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.Internal.Models.SamanSettlementIbanInfo.IBAN">
+            <summary>
+            IBAN (Sheba) number of the beneficiary account.
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.Internal.Models.SamanSettlementIbanInfo.Amount">
+            <summary>
+            Amount to be settled to this IBAN (in Rials).
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.Internal.Models.SamanSettlementIbanInfo.PurchaseId">
+            <summary>
+            Optional purchase identifier.
+            </summary>
+        </member>
+        <member name="T:Parbad.Gateway.Saman.Internal.Models.SamanTashimTokenRequest">
+            <summary>
+            Token request model for Saman Gateway with Tashim Online (settlement/split) support.
+            </summary>
+        </member>
         <member name="M:Parbad.Gateway.Saman.SamanGateway.RequestAsync(Parbad.Abstraction.Invoice,System.Threading.CancellationToken)">
             <inheritdoc />
         </member>
@@ -973,6 +856,44 @@
             Sets additional data which will be sent to Saman Gateway.
             </summary>
         </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.SetSamanSettlementInfo(Parbad.InvoiceBuilder.IInvoiceBuilder,System.Collections.Generic.IEnumerable{Parbad.Gateway.Saman.SamanSettlementInfo})">
+            <summary>
+            Sets settlement (Tashim) information for splitting payment to multiple IBANs.
+            Items with Amount equal to 0 will be automatically filtered out.
+            </summary>
+            <param name="builder">The invoice builder.</param>
+            <param name="settlementInfos">List of settlement items containing IBAN and Amount.</param>
+        </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.AddSamanSettlement(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String,System.Int64,System.String)">
+            <summary>
+            Adds a single settlement (Tashim) item for splitting payment. Can be called multiple times to add more items.
+            Items with Amount equal to 0 will be automatically filtered out when sending to gateway.
+            </summary>
+            <param name="builder">The invoice builder.</param>
+            <param name="iban">IBAN (Sheba) number of the beneficiary account.</param>
+            <param name="amount">Amount to be settled to this IBAN (in Rials).</param>
+            <param name="purchaseId">Optional purchase identifier.</param>
+        </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.SetSamanResNum1(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
+            <summary>
+            Sets the ResNum1 reference number for Saman settlement.
+            </summary>
+        </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.SetSamanResNum2(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
+            <summary>
+            Sets the ResNum2 reference number for Saman settlement.
+            </summary>
+        </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.SetSamanResNum3(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
+            <summary>
+            Sets the ResNum3 reference number for Saman settlement.
+            </summary>
+        </member>
+        <member name="M:Parbad.Gateway.Saman.SamanGatewayInvoiceBuilderExtensions.SetSamanResNum4(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
+            <summary>
+            Sets the ResNum4 reference number for Saman settlement (typically used for main IBAN).
+            </summary>
+        </member>
         <member name="M:Parbad.Gateway.Saman.SamanPaymentResultExtensions.GetSamanAdditionalData(Parbad.IPaymentFetchResult)">
             <summary>
             Gets the additional data which is received from Saman Gateway. 
@@ -981,6 +902,169 @@
         <member name="M:Parbad.Gateway.Saman.SamanPaymentResultExtensions.GetSamanAdditionalData(Parbad.IPaymentVerifyResult)">
             <summary>
             Gets the additional data which is received from Saman Gateway. 
+            </summary>
+        </member>
+        <member name="T:Parbad.Gateway.Saman.SamanSettlementInfo">
+            <summary>
+            Represents settlement (Tashim) information for splitting payment to multiple IBANs.
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.SamanSettlementInfo.IBAN">
+            <summary>
+            IBAN (Sheba) number of the beneficiary account.
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.SamanSettlementInfo.Amount">
+            <summary>
+            Amount to be settled to this IBAN (in Rials).
+            Note: Items with Amount equal to 0 will be automatically filtered out.
+            </summary>
+        </member>
+        <member name="P:Parbad.Gateway.Saman.SamanSettlementInfo.PurchaseId">
+            <summary>
+            Optional purchase identifier.
+            </summary>
+        </member>
+        <member name="F:Parbad.GatewayAccountInvoiceExtensions.GatewayAccountKeyName">
+            <summary>
+            Gateway Account key in <see cref="P:Parbad.Abstraction.Invoice.Properties"/> property.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayAccountInvoiceExtensions.UseAccount(Parbad.InvoiceBuilder.IInvoiceBuilder,System.String)">
+            <summary>
+            Uses the given account to communicate with the gateway.
+            </summary>
+            <param name="builder"></param>
+            <param name="accountName">Name of the account.</param>
+        </member>
+        <member name="M:Parbad.GatewayAccountInvoiceExtensions.GetAccountName(Parbad.Abstraction.Invoice)">
+            <summary>
+            Gets the account name if specified.
+            </summary>
+            <param name="invoice"></param>
+        </member>
+        <member name="T:Parbad.GatewayBuilders.IGatewayAccountBuilder`1">
+            <summary>
+            A builder for building gateway accounts.
+            </summary>
+            <typeparam name="TAccount">Type of the gateway account.</typeparam>
+        </member>
+        <member name="P:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Services">
+            <summary>
+            Specifies the contract for a collection of service descriptors.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Clear">
+            <summary>
+            Removes the account sources of this gateway.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add(Parbad.GatewayBuilders.IGatewayAccountSource{`0})">
+            <summary>
+            Adds the given <paramref name="source"/> for specifying the accounts of type <typeparamref name="TAccount"/>.
+            </summary>
+            <param name="source">An account source for specifying the accounts.</param>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add``1(Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the given <typeparamref name="TSource"/> for specifying the accounts of type <typeparamref name="TAccount"/>.
+            </summary>
+            <typeparam name="TSource">Type of the account source.</typeparam>
+            <param name="serviceLifetime">Lifetime of <typeparamref name="TSource"></typeparamref>.</param>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountBuilder`1.Add(System.Func{System.IServiceProvider,Parbad.GatewayBuilders.IGatewayAccountSource{`0}},Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the given account source factory for specifying the accounts of type <typeparamref name="TAccount"/>.
+            </summary>
+            <param name="factory">A factory for creating an instance of <see cref="T:Parbad.GatewayBuilders.IGatewayAccountSource`1"/>.</param>
+            <param name="serviceLifetime">Lifetime of the given source.</param>
+        </member>
+        <member name="T:Parbad.GatewayBuilders.IGatewayAccountCollection`1">
+            <summary>
+            A collection for holding gateway accounts.
+            </summary>
+            <typeparam name="TAccount">Type of account.</typeparam>
+            <exception cref="T:Parbad.Exceptions.DuplicateAccountException"></exception>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountCollection`1.Get(System.String)">
+            <summary>
+            Gets an account with the given <paramref name="name"/>.
+            </summary>
+            <param name="name">Name of account.</param>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountCollection`1.GetDefaultAccount">
+            <summary>
+            Gets the first account.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Parbad.GatewayBuilders.IGatewayAccountSource`1">
+            <summary>
+            A source which used to add the accounts of the specified gateway.
+            </summary>
+            <typeparam name="TAccount"></typeparam>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayAccountSource`1.AddAccountsAsync(Parbad.GatewayBuilders.IGatewayAccountCollection{`0})">
+            <summary>
+            Adds the accounts for specified gateway.
+            </summary>
+            <param name="accounts"></param>
+        </member>
+        <member name="T:Parbad.GatewayBuilders.IGatewayBuilder">
+            <summary>
+            A builder for building a gateway.
+            </summary>
+        </member>
+        <member name="P:Parbad.GatewayBuilders.IGatewayBuilder.Services">
+            <summary>
+            Specifies the contract for a collection of service descriptors.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayBuilder.AddGateway``1(Microsoft.Extensions.DependencyInjection.ServiceLifetime)">
+            <summary>
+            Adds the specified gateway to Parbad services.
+            </summary>
+            <typeparam name="TGateway">Type of gateway.</typeparam>
+            <param name="serviceLifetime">Lifetime of <typeparamref name="TGateway"/>.</param>
+        </member>
+        <member name="T:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1">
+            <summary>
+            A builder for configuring the specified gateway.
+            </summary>
+            <typeparam name="TGateway">Type of gateway.</typeparam>
+        </member>
+        <member name="P:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.Services">
+            <summary>
+            Specifies the contract for a collection of service descriptors.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithAccounts``1(System.Action{Parbad.GatewayBuilders.IGatewayAccountBuilder{``0}})">
+            <summary>
+            Configures the accounts of type <typeparamref name="TAccount"/> for <typeparamref name="TGateway"/>.
+            </summary>
+            <typeparam name="TAccount">Account of <typeparamref name="TGateway"/>.</typeparam>
+            <param name="configureAccounts">Configures the accounts.</param>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithHttpClient(System.Action{Microsoft.Extensions.DependencyInjection.IHttpClientBuilder})">
+            <summary>
+            Configures the <see cref="T:System.Net.Http.HttpClient"/> required by <typeparamref name="TGateway"/>
+            for sending HTTP requests and receiving HTTP responses.
+            </summary>
+            <param name="configureHttpClient">HttpClient configuration.</param>
+        </member>
+        <member name="M:Parbad.GatewayBuilders.IGatewayConfigurationBuilder`1.WithHttpClient``2(System.Action{System.IServiceProvider,System.Net.Http.HttpClient},System.Action{Microsoft.Extensions.DependencyInjection.IHttpClientBuilder})">
+            <summary>
+            Configures the HttpClient for TGateway and its implementation.
+            </summary>
+        </member>
+        <member name="T:Parbad.GatewayTransporterDescriptor">
+            <summary>
+            Describes a gateway transporter.
+            </summary>
+        </member>
+        <member name="M:Parbad.GatewayTransporterExtensions.Transport(Parbad.IGatewayTransporter)">
+            <summary>
+            Transports the client to the specified gateway.
             </summary>
         </member>
         <member name="T:Parbad.IGatewayTransporter">

@@ -46,7 +46,9 @@ public class SamanGateway : GatewayBase<SamanGatewayAccount>
 
         var account = await GetAccountAsync(invoice);
 
-        var tokenRequestModel = SamanHelper.CreateTokenRequestModel(invoice, account);
+        object tokenRequestModel = SamanHelper.HasSettlementInfo(invoice)
+            ? SamanHelper.CreateTashimTokenRequestModel(invoice, account)
+            : SamanHelper.CreateTokenRequestModel(invoice, account);
 
         var responseModel = await _httpClient.PostJsonAsync<SamanTokenResponse>(_gatewayOptions.ApiTokenUrl,
                                                                                 tokenRequestModel,

@@ -25,6 +25,11 @@ internal static class SamanHelper
     private const int VerificationSuccessCode = 0;
     public const string AdditionalVerificationDataKey = "SamanAdditionalVerificationData";
     public const string CellNumberPropertyKey = "SamanCellNumber";
+    public const string SettlementInfoPropertyKey = "SamanSettlementInfo";
+    public const string ResNum1PropertyKey = "SamanResNum1";
+    public const string ResNum2PropertyKey = "SamanResNum2";
+    public const string ResNum3PropertyKey = "SamanResNum3";
+    public const string ResNum4PropertyKey = "SamanResNum4";
 
     public static SamanTokenRequest CreateTokenRequestModel(Invoice invoice, SamanGatewayAccount account)
     {
@@ -44,6 +49,42 @@ internal static class SamanHelper
         }
 
         return model;
+    }
+
+    public static SamanTashimTokenRequest CreateTashimTokenRequestModel(Invoice invoice, SamanGatewayAccount account)
+    {
+        var settlementInfos = invoice.GetSamanSettlementInfo();
+
+        var filteredSettlements = settlementInfos?
+            .Where(s => s.Amount > 0)
+            .Select(s => new SamanSettlementIbanInfo
+                         {
+                             IBAN = s.IBAN,
+                             Amount = s.Amount,
+                             PurchaseId = s.PurchaseId
+                         })
+            .ToList();
+
+        return new SamanTashimTokenRequest
+               {
+                   Action = "token",
+                   TerminalId = account.TerminalId,
+                   Amount = invoice.Amount,
+                   ResNum = invoice.TrackingNumber.ToString(),
+                   RedirectUrl = invoice.CallbackUrl,
+                   CellNumber = invoice.GetSamanCellNumber(),
+                   ResNum1 = invoice.GetSamanResNum1(),
+                   ResNum2 = invoice.GetSamanResNum2(),
+                   ResNum3 = invoice.GetSamanResNum3(),
+                   ResNum4 = invoice.GetSamanResNum4(),
+                   SettlementIbanInfo = filteredSettlements != null && filteredSettlements.Any() ? filteredSettlements : null
+               };
+    }
+
+    public static bool HasSettlementInfo(Invoice invoice)
+    {
+        var settlementInfo = invoice.GetSamanSettlementInfo();
+        return settlementInfo != null && settlementInfo.Any();
     }
 
     public static IPaymentRequestResult CreatePaymentRequestResult(SamanTokenResponse tokenResponse,

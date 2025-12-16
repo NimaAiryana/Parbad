@@ -95,6 +95,15 @@ internal static class SamanHelper
     {
         if (tokenResponse.Status == 1)
         {
+            if (gatewayOptions.UseGetMethodForPaymentPage)
+            {
+                var redirectUrl = string.Concat(gatewayOptions.SendTokenUrl,
+                                                "?token=",
+                                                Uri.EscapeDataString(tokenResponse.Token));
+
+                return PaymentRequestResult.SucceedWithRedirect(account.Name, httpContext, redirectUrl);
+            }
+
             var form = new Dictionary<string, string>
                        {
                            { "Token", tokenResponse.Token },

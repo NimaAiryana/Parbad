@@ -12,4 +12,8 @@ public class SamanGatewayOptions
     public string ApiVerificationUrl { get; set; } = "https://sep.shaparak.ir/verifyTxnRandomSessionkey/ipg/VerifyTransaction";
 
     public string ApiReverseUrl { get; set; } = "https://sep.shaparak.ir/verifyTxnRandomSessionkey/ipg/ReverseTransaction";
+
+    public string SendTokenUrl { get; set; } = "https://sep.shaparak.ir/OnlinePG/SendToken";
+
+    public bool UseGetMethodForPaymentPage { get; set; } = false;
 }

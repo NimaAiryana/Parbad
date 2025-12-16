@@ -22,6 +22,36 @@ public static class SamanGatewayInvoiceBuilderExtensions
         return builder.SetGateway(SamanGateway.Name);
     }
 
+    public static IInvoiceBuilder UseSaman(
+        this IInvoiceBuilder builder,
+        bool? useGetMethodForPaymentPage = null)
+    {
+        if (builder == null) throw new ArgumentNullException(nameof(builder));
+
+        builder.SetGateway(SamanGateway.Name);
+
+        if (useGetMethodForPaymentPage.HasValue)
+        {
+            builder.AddOrUpdateProperty(SamanHelper.UseGetMethodForPaymentPagePropertyKey, useGetMethodForPaymentPage.Value);
+        }
+
+        return builder;
+    }
+
+    public static IInvoiceBuilder UseSamanWithGetMethod(this IInvoiceBuilder builder)
+    {
+        if (builder == null) throw new ArgumentNullException(nameof(builder));
+
+        return builder.UseSaman(useGetMethodForPaymentPage: true);
+    }
+
+    public static IInvoiceBuilder UseSamanWithPostMethod(this IInvoiceBuilder builder)
+    {
+        if (builder == null) throw new ArgumentNullException(nameof(builder));
+
+        return builder.UseSaman(useGetMethodForPaymentPage: false);
+    }
+
     /// <summary>
     /// Sets additional data which will be sent to Saman Gateway.
     /// </summary>
@@ -42,6 +72,17 @@ public static class SamanGatewayInvoiceBuilderExtensions
         if (invoice.Properties.TryGetValue(SamanHelper.CellNumberPropertyKey, out var cellNumber))
         {
             return cellNumber.ToString();
+        }
+
+        return null;
+    }
+
+    internal static bool? GetSamanUseGetMethodForPaymentPage(this Invoice invoice)
+    {
+        if (invoice.Properties.TryGetValue(SamanHelper.UseGetMethodForPaymentPagePropertyKey, out var value) &&
+            value is bool boolValue)
+        {
+            return boolValue;
         }
 
         return null;

@@ -54,11 +54,15 @@ public class SamanGateway : GatewayBase<SamanGatewayAccount>
                                                                                 tokenRequestModel,
                                                                                 cancellationToken: cancellationToken);
 
+        var useGetMethodOverride = invoice.GetSamanUseGetMethodForPaymentPage();
+        var useGetMethod = useGetMethodOverride ?? _gatewayOptions.UseGetMethodForPaymentPage;
+
         return SamanHelper.CreatePaymentRequestResult(responseModel,
                                                       account,
                                                       _httpContextAccessor.HttpContext,
                                                       _gatewayOptions,
-                                                      _messageOptions);
+                                                      _messageOptions,
+                                                      useGetMethod);
     }
 
     /// <inheritdoc />

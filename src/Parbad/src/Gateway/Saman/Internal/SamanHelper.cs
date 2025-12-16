@@ -25,6 +25,7 @@ internal static class SamanHelper
     private const int VerificationSuccessCode = 0;
     public const string AdditionalVerificationDataKey = "SamanAdditionalVerificationData";
     public const string CellNumberPropertyKey = "SamanCellNumber";
+    public const string UseGetMethodForPaymentPagePropertyKey = "SamanUseGetMethodForPaymentPage";
     public const string SettlementInfoPropertyKey = "SamanSettlementInfo";
     public const string ResNum1PropertyKey = "SamanResNum1";
     public const string ResNum2PropertyKey = "SamanResNum2";
@@ -93,9 +94,24 @@ internal static class SamanHelper
                                                                    SamanGatewayOptions gatewayOptions,
                                                                    MessagesOptions messagesOptions)
     {
+        return CreatePaymentRequestResult(tokenResponse,
+                                           account,
+                                           httpContext,
+                                           gatewayOptions,
+                                           messagesOptions,
+                                           gatewayOptions.UseGetMethodForPaymentPage);
+    }
+
+    public static IPaymentRequestResult CreatePaymentRequestResult(SamanTokenResponse tokenResponse,
+                                                                    SamanGatewayAccount account,
+                                                                    HttpContext httpContext,
+                                                                    SamanGatewayOptions gatewayOptions,
+                                                                    MessagesOptions messagesOptions,
+                                                                    bool useGetMethodForPaymentPage)
+    {
         if (tokenResponse.Status == 1)
         {
-            if (gatewayOptions.UseGetMethodForPaymentPage)
+            if (useGetMethodForPaymentPage)
             {
                 var redirectUrl = string.Concat(gatewayOptions.SendTokenUrl,
                                                 "?token=",

@@ -171,9 +171,9 @@ namespace Parbad.Internal
                 throw new InvoiceNotFoundException(paymentToken);
             }
 
-            var result = await FetchAsync(payment, cancellationToken);
+            var gateway = _gatewayProvider.Provide(payment.GatewayName);
 
-            return result;
+            return await FetchInternalAsync(payment, gateway, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -192,9 +192,9 @@ namespace Parbad.Internal
                 throw new InvoiceNotFoundException(trackingNumber);
             }
 
-            var result = await FetchAsync(payment, cancellationToken);
+            var gateway = _gatewayProvider.Provide(payment.GatewayName);
 
-            return result;
+            return await FetchInternalAsync(payment, gateway, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -215,71 +215,9 @@ namespace Parbad.Internal
                 throw new InvoiceNotFoundException(trackingNumber);
             }
 
-            if (payment.IsCompleted)
-            {
-                _logger.LogInformation(LoggingEvents.VerifyPayment,
-                                       "Verifying the invoice {TrackingNumber} is finished. The requested payment is already processed before",
-                                       trackingNumber);
-
-                return new PaymentVerifyResult
-                {
-                    TrackingNumber = payment.TrackingNumber,
-                    Amount = payment.Amount,
-                    GatewayName = payment.GatewayName,
-                    GatewayAccountName = payment.GatewayAccountName,
-                    TransactionCode = payment.TransactionCode,
-                    Status = payment.IsPaid ? PaymentVerifyResultStatus.AlreadyVerified : PaymentVerifyResultStatus.Failed,
-                    Message = _options.Messages.PaymentIsAlreadyProcessedBefore
-                };
-            }
-
             var gateway = _gatewayProvider.Provide(payment.GatewayName);
 
-            var transactions = await _storageManager.GetTransactionsAsync(payment, cancellationToken).ConfigureAwaitFalse();
-            var invoiceContext = new InvoiceContext(payment, transactions);
-
-            PaymentVerifyResult verifyResult;
-
-            try
-            {
-                verifyResult = await gateway
-                    .VerifyAsync(invoiceContext, cancellationToken)
-                    .ConfigureAwaitFalse() as PaymentVerifyResult;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(LoggingEvents.VerifyPayment, exception, "Verifying the invoice {TrackingNumber} is finished. An error occurred during requesting", trackingNumber);
-                throw;
-            }
-
-            if (verifyResult == null) throw new Exception($"The {gateway.GetCompleteGatewayName()} returns null instead of a result.");
-
-            verifyResult.TrackingNumber = payment.TrackingNumber;
-            verifyResult.Amount = payment.Amount;
-            verifyResult.GatewayName = payment.GatewayName;
-            verifyResult.GatewayAccountName = payment.GatewayAccountName;
-
-            payment.IsCompleted = true;
-            payment.IsPaid = verifyResult.IsSucceed;
-            payment.TransactionCode = verifyResult.TransactionCode;
-
-            await _storageManager.UpdatePaymentAsync(payment, cancellationToken).ConfigureAwaitFalse();
-
-            var transaction = new Transaction
-            {
-                Amount = verifyResult.Amount,
-                IsSucceed = verifyResult.IsSucceed,
-                Message = verifyResult.Message,
-                Type = TransactionType.Verify,
-                AdditionalData = AdditionalDataConverter.ToJson(verifyResult),
-                PaymentId = payment.Id
-            };
-
-            await _storageManager.CreateTransactionAsync(transaction, cancellationToken).ConfigureAwaitFalse();
-
-            _logger.LogInformation(LoggingEvents.VerifyPayment, "Verifying the invoice {TrackingNumber} is finished", trackingNumber);
-
-            return verifyResult;
+            return await VerifyInternalAsync(payment, gateway, trackingNumber, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -364,6 +302,248 @@ namespace Parbad.Internal
                 throw new InvoiceNotFoundException(invoice.TrackingNumber);
             }
 
+            var gateway = _gatewayProvider.Provide(payment.GatewayName);
+
+            return await RefundInternalAsync(invoice, payment, gateway, cancellationToken);
+        }
+
+
+        public async Task<IPaymentFetchResult> FetchByAccountNameAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation(LoggingEvents.FetchPayment, "Fetch payment with account name is requested from HTTP request");
+
+            var paymentToken = await _tokenProvider.RetrieveTokenAsync(cancellationToken).ConfigureAwaitFalse();
+
+            if (string.IsNullOrEmpty(paymentToken))
+            {
+                _logger.LogError(LoggingEvents.FetchPayment, "Fetching failed. No payment token is received");
+
+                throw new PaymentTokenProviderException("No Token is received.");
+            }
+
+            var payment = await _storageManager.GetPaymentByTokenAsync(paymentToken, cancellationToken).ConfigureAwaitFalse();
+
+            if (payment == null)
+            {
+                _logger.LogError(LoggingEvents.FetchPayment, "Fetching failed. The operation is not valid. No payment found with the token: {PaymentToken}", paymentToken);
+
+                throw new InvoiceNotFoundException(paymentToken);
+            }
+
+            return await FetchByAccountNameInternalAsync(payment, cancellationToken);
+        }
+
+        public async Task<IPaymentFetchResult> FetchByAccountNameAsync(
+            long trackingNumber,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation(LoggingEvents.FetchPayment, "Fetch payment with account name is requested for tracking number {TrackingNumber}", trackingNumber);
+
+            var payment = await _storageManager.GetPaymentByTrackingNumberAsync(trackingNumber, cancellationToken).ConfigureAwaitFalse();
+
+            if (payment == null)
+            {
+                _logger.LogError(LoggingEvents.FetchPayment,
+                                 "Fetching the invoice is failed. The operation is not valid. No payment found with for the given tracking number {TrackingNumber}",
+                                 trackingNumber);
+
+                throw new InvoiceNotFoundException(trackingNumber);
+            }
+
+            return await FetchByAccountNameInternalAsync(payment, cancellationToken);
+        }
+
+        public async Task<IPaymentVerifyResult> VerifyByAccountNameAsync(
+            long trackingNumber,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation(LoggingEvents.VerifyPayment, "Verify payment with account name is requested for tracking number {TrackingNumber}", trackingNumber);
+
+            var payment = await _storageManager.GetPaymentByTrackingNumberAsync(trackingNumber, cancellationToken).ConfigureAwaitFalse();
+
+            if (payment == null)
+            {
+                _logger.LogError(LoggingEvents.VerifyPayment,
+                                 "Verifying the invoice {TrackingNumber} is failed. The operation is not valid. No payment found with for the given tracking number",
+                                 trackingNumber);
+
+                throw new InvoiceNotFoundException(trackingNumber);
+            }
+
+            var gateway = _gatewayProvider.ProvideByAccountName(payment.GatewayAccountName);
+
+            return await VerifyInternalAsync(payment, gateway, trackingNumber, cancellationToken);
+        }
+
+        public async Task<IPaymentRefundResult> RefundByAccountNameAsync(
+            RefundInvoice invoice,
+            CancellationToken cancellationToken = default)
+        {
+            if (invoice == null) throw new ArgumentNullException(nameof(invoice));
+
+            _logger.LogInformation(LoggingEvents.RefundPayment, "Refund payment with account name is requested for tracking number {TrackingNumber}", invoice.TrackingNumber);
+
+            var payment = await _storageManager.GetPaymentByTrackingNumberAsync(invoice.TrackingNumber, cancellationToken).ConfigureAwaitFalse();
+
+            if (payment == null)
+            {
+                _logger.LogError(LoggingEvents.RefundPayment,
+                                 "Refunding the invoice {TrackingNumber} is failed. The operation is not valid. No payment found with for the given tracking number",
+                                 invoice.TrackingNumber);
+
+                throw new InvoiceNotFoundException(invoice.TrackingNumber);
+            }
+
+            var gateway = _gatewayProvider.ProvideByAccountName(payment.GatewayAccountName);
+
+            return await RefundInternalAsync(invoice, payment, gateway, cancellationToken);
+        }
+
+        private async Task<IPaymentFetchResult> FetchByAccountNameInternalAsync(Payment payment, CancellationToken cancellationToken)
+        {
+            var gateway = _gatewayProvider.ProvideByAccountName(payment.GatewayAccountName);
+
+            return await FetchInternalAsync(payment, gateway, cancellationToken);
+        }
+
+        private async Task<IPaymentFetchResult> FetchInternalAsync(
+            Payment payment,
+            IGateway gateway,
+            CancellationToken cancellationToken)
+        {
+            var fetchResult = new PaymentFetchResult
+            {
+                TrackingNumber = payment.TrackingNumber,
+                Amount = payment.Amount,
+                GatewayName = payment.GatewayName,
+                GatewayAccountName = payment.GatewayAccountName,
+                IsAlreadyVerified = payment.IsPaid
+            };
+
+            if (payment.IsCompleted)
+            {
+                fetchResult.Status = PaymentFetchResultStatus.AlreadyProcessed;
+                fetchResult.Message = _options.Messages.PaymentIsAlreadyProcessedBefore;
+                fetchResult.TransactionCode = payment.TransactionCode;
+
+                return fetchResult;
+            }
+
+            var transactions = await _storageManager.GetTransactionsAsync(payment, cancellationToken).ConfigureAwaitFalse();
+            var invoiceContext = new InvoiceContext(payment, transactions);
+
+            PaymentFetchResult gatewayFetchResult;
+
+            try
+            {
+                gatewayFetchResult = await gateway
+                    .FetchAsync(invoiceContext, cancellationToken)
+                    .ConfigureAwaitFalse() as PaymentFetchResult;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(LoggingEvents.VerifyPayment,
+                                 exception,
+                                 "Fetching the invoice {TrackingNumber} is finished. An error occurred during requesting",
+                                 payment.TrackingNumber);
+                throw;
+            }
+
+            if (gatewayFetchResult == null) throw new Exception($"The {gateway.GetCompleteGatewayName()} returns null instead of a result.");
+
+            _logger.LogInformation(LoggingEvents.FetchPayment, "Fetching is finished");
+
+            fetchResult.Status = gatewayFetchResult.Status;
+
+            string message = null;
+            if (gatewayFetchResult.Status != PaymentFetchResultStatus.ReadyForVerifying)
+            {
+                message = gatewayFetchResult.Message ?? _options.Messages.PaymentFailed;
+            }
+            fetchResult.Message = message;
+
+            fetchResult.GatewayResponseCode = gatewayFetchResult.GatewayResponseCode;
+
+            return fetchResult;
+        }
+
+        private async Task<IPaymentVerifyResult> VerifyInternalAsync(
+            Payment payment,
+            IGateway gateway,
+            long trackingNumber,
+            CancellationToken cancellationToken)
+        {
+            if (payment.IsCompleted)
+            {
+                _logger.LogInformation(LoggingEvents.VerifyPayment,
+                                       "Verifying the invoice {TrackingNumber} is finished. The requested payment is already processed before",
+                                       trackingNumber);
+
+                return new PaymentVerifyResult
+                {
+                    TrackingNumber = payment.TrackingNumber,
+                    Amount = payment.Amount,
+                    GatewayName = payment.GatewayName,
+                    GatewayAccountName = payment.GatewayAccountName,
+                    TransactionCode = payment.TransactionCode,
+                    Status = payment.IsPaid ? PaymentVerifyResultStatus.AlreadyVerified : PaymentVerifyResultStatus.Failed,
+                    Message = _options.Messages.PaymentIsAlreadyProcessedBefore
+                };
+            }
+
+            var transactions = await _storageManager.GetTransactionsAsync(payment, cancellationToken).ConfigureAwaitFalse();
+            var invoiceContext = new InvoiceContext(payment, transactions);
+
+            PaymentVerifyResult verifyResult;
+
+            try
+            {
+                verifyResult = await gateway
+                    .VerifyAsync(invoiceContext, cancellationToken)
+                    .ConfigureAwaitFalse() as PaymentVerifyResult;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(LoggingEvents.VerifyPayment, exception, "Verifying the invoice {TrackingNumber} is finished. An error occurred during requesting", trackingNumber);
+                throw;
+            }
+
+            if (verifyResult == null) throw new Exception($"The {gateway.GetCompleteGatewayName()} returns null instead of a result.");
+
+            verifyResult.TrackingNumber = payment.TrackingNumber;
+            verifyResult.Amount = payment.Amount;
+            verifyResult.GatewayName = payment.GatewayName;
+            verifyResult.GatewayAccountName = payment.GatewayAccountName;
+
+            payment.IsCompleted = true;
+            payment.IsPaid = verifyResult.IsSucceed;
+            payment.TransactionCode = verifyResult.TransactionCode;
+
+            await _storageManager.UpdatePaymentAsync(payment, cancellationToken).ConfigureAwaitFalse();
+
+            var transaction = new Transaction
+            {
+                Amount = verifyResult.Amount,
+                IsSucceed = verifyResult.IsSucceed,
+                Message = verifyResult.Message,
+                Type = TransactionType.Verify,
+                AdditionalData = AdditionalDataConverter.ToJson(verifyResult),
+                PaymentId = payment.Id
+            };
+
+            await _storageManager.CreateTransactionAsync(transaction, cancellationToken).ConfigureAwaitFalse();
+
+            _logger.LogInformation(LoggingEvents.VerifyPayment, "Verifying the invoice {TrackingNumber} is finished", trackingNumber);
+
+            return verifyResult;
+        }
+
+        private async Task<IPaymentRefundResult> RefundInternalAsync(
+            RefundInvoice invoice,
+            Payment payment,
+            IGateway gateway,
+            CancellationToken cancellationToken)
+        {
             if (!payment.IsCompleted)
             {
                 var message = $"{_options.Messages.OnlyCompletedPaymentCanBeRefunded} Tracking number: {invoice.TrackingNumber}.";
@@ -389,8 +569,6 @@ namespace Parbad.Internal
             {
                 amountToRefund = invoice.Amount;
             }
-
-            var gateway = _gatewayProvider.Provide(payment.GatewayName);
 
             var transactions = await _storageManager.GetTransactionsAsync(payment, cancellationToken).ConfigureAwaitFalse();
             var verifyContext = new InvoiceContext(payment, transactions);
@@ -431,66 +609,6 @@ namespace Parbad.Internal
             _logger.LogInformation(LoggingEvents.RefundPayment, "Refunding the invoice {TrackingNumber} is finished", invoice.TrackingNumber);
 
             return refundResult;
-        }
-
-        private async Task<IPaymentFetchResult> FetchAsync(Payment payment, CancellationToken cancellationToken)
-        {
-            var fetchResult = new PaymentFetchResult
-            {
-                TrackingNumber = payment.TrackingNumber,
-                Amount = payment.Amount,
-                GatewayName = payment.GatewayName,
-                GatewayAccountName = payment.GatewayAccountName,
-                IsAlreadyVerified = payment.IsPaid
-            };
-
-            if (payment.IsCompleted)
-            {
-                fetchResult.Status = PaymentFetchResultStatus.AlreadyProcessed;
-                fetchResult.Message = _options.Messages.PaymentIsAlreadyProcessedBefore;
-                fetchResult.TransactionCode = payment.TransactionCode;
-
-                return fetchResult;
-            }
-
-            var gateway = _gatewayProvider.Provide(payment.GatewayName);
-
-            var transactions = await _storageManager.GetTransactionsAsync(payment, cancellationToken).ConfigureAwaitFalse();
-            var invoiceContext = new InvoiceContext(payment, transactions);
-
-            PaymentFetchResult gatewayFetchResult;
-
-            try
-            {
-                gatewayFetchResult = await gateway
-                    .FetchAsync(invoiceContext, cancellationToken)
-                    .ConfigureAwaitFalse() as PaymentFetchResult;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(LoggingEvents.VerifyPayment,
-                                 exception,
-                                 "Fetching the invoice {TrackingNumber} is finished. An error occurred during requesting",
-                                 payment.TrackingNumber);
-                throw;
-            }
-
-            if (gatewayFetchResult == null) throw new Exception($"The {gateway.GetCompleteGatewayName()} returns null instead of a result.");
-
-            _logger.LogInformation(LoggingEvents.FetchPayment, "Fetching is finished");
-
-            fetchResult.Status = gatewayFetchResult.Status;
-
-            string message = null;
-            if (gatewayFetchResult.Status != PaymentFetchResultStatus.ReadyForVerifying)
-            {
-                message = gatewayFetchResult.Message ?? _options.Messages.PaymentFailed;
-            }
-            fetchResult.Message = message;
-
-            fetchResult.GatewayResponseCode = gatewayFetchResult.GatewayResponseCode;
-
-            return fetchResult;
         }
     }
 }

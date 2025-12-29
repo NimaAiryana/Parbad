@@ -106,6 +106,12 @@
             </summary>
             <param name="gatewayName">Name of the gateway.</param>
         </member>
+        <member name="M:Parbad.Abstraction.IGatewayProvider.ProvideByAccountName(System.String)">
+            <summary>
+            Provides an instance of <see cref="T:Parbad.Abstraction.IGateway"/> using the given <paramref name="gatewayAccountName"/>.
+            </summary>
+            <param name="gatewayAccountName">Name of the gateway account.</param>
+        </member>
         <member name="T:Parbad.Abstraction.Invoice">
             <summary>
             Describes an invoice which must be requested.
@@ -1095,6 +1101,9 @@
         <member name="M:Parbad.Internal.DefaultGatewayProvider.Provide(System.String)">
             <inheritdoc />
         </member>
+        <member name="M:Parbad.Internal.DefaultGatewayProvider.ProvideByAccountName(System.String)">
+            <inheritdoc />
+        </member>
         <member name="T:Parbad.Internal.DefaultGatewayTransporter">
             <inheritdoc />
         </member>
@@ -1543,6 +1552,43 @@
         <member name="M:Parbad.IOnlinePayment.RefundAsync(Parbad.RefundInvoice,System.Threading.CancellationToken)">
             <summary>
             Performs a refund request for the given invoice.
+            <para>Note: Pelase keep in mind that not all gateways support the Refund operation.</para>
+            </summary>
+            <param name="invoice">The invoice that must be refunded.</param>
+            <param name="cancellationToken"></param>
+            <exception cref="T:Parbad.Exceptions.InvoiceNotFoundException"></exception>
+            <exception cref="T:System.ArgumentNullException"></exception>
+        </member>
+        <member name="M:Parbad.IOnlinePayment.FetchByAccountNameAsync(System.Threading.CancellationToken)">
+            <summary>
+            Fetches the invoice from the incoming HTTP request and finds gateway by account name.
+            </summary>
+            <param name="cancellationToken"></param>
+            <exception cref="T:Parbad.PaymentTokenProviders.PaymentTokenProviderException"></exception>
+            <exception cref="T:Parbad.Exceptions.InvoiceNotFoundException"></exception>
+        </member>
+        <member name="M:Parbad.IOnlinePayment.FetchByAccountNameAsync(System.Int64,System.Threading.CancellationToken)">
+            <summary>
+            Fetches the invoice using the given tracking number and finds gateway by account name.
+            </summary>
+            <param name="trackingNumber">Invoice's tracking number.</param>
+            <param name="cancellationToken"></param>
+            <exception cref="T:Parbad.PaymentTokenProviders.PaymentTokenProviderException"></exception>
+            <exception cref="T:Parbad.Exceptions.InvoiceNotFoundException"></exception>
+        </member>
+        <member name="M:Parbad.IOnlinePayment.VerifyByAccountNameAsync(System.Int64,System.Threading.CancellationToken)">
+            <summary>
+            Verifies the requested payment to check whether or not the invoice was paid in the gateway by the client.
+            Finds gateway by account name instead of gateway name.
+            </summary>
+            <param name="trackingNumber">The tracking number of the invoice which must be verified.</param>
+            <param name="cancellationToken"></param>
+            <exception cref="T:Parbad.Exceptions.InvoiceNotFoundException"></exception>
+        </member>
+        <member name="M:Parbad.IOnlinePayment.RefundByAccountNameAsync(Parbad.RefundInvoice,System.Threading.CancellationToken)">
+            <summary>
+            Performs a refund request for the given invoice.
+            Finds gateway by account name instead of gateway name.
             <para>Note: Pelase keep in mind that not all gateways support the Refund operation.</para>
             </summary>
             <param name="invoice">The invoice that must be refunded.</param>

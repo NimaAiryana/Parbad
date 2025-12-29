@@ -13,5 +13,11 @@ namespace Parbad.Abstraction
         /// </summary>
         /// <param name="gatewayName">Name of the gateway.</param>
         IGateway Provide(string gatewayName);
+
+        /// <summary>
+        /// Provides an instance of <see cref="IGateway"/> using the given <paramref name="gatewayAccountName"/>.
+        /// </summary>
+        /// <param name="gatewayAccountName">Name of the gateway account.</param>
+        IGateway ProvideByAccountName(string gatewayAccountName);
     }
 }
